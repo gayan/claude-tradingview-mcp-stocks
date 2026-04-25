@@ -23,7 +23,7 @@ import {
 
 // ─── Config ────────────────────────────────────────────────────────────────
 
-const SYMBOLS = (process.env.ORB_SYMBOLS || "SPY,QQQ,IWM")
+const SYMBOLS = (process.env.ORB_SYMBOLS || "NVDA,SPY,QQQ")
   .split(",")
   .map((s) => s.trim().toUpperCase());
 const PORTFOLIO = parseFloat(process.env.PORTFOLIO_VALUE_USD || "2500");

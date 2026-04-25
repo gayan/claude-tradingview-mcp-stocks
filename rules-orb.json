@@ -1,5 +1,5 @@
 {
-  "watchlist": ["SPY", "QQQ", "IWM"],
+  "watchlist": ["NVDA", "SPY", "QQQ"],
   "default_timeframe": "1m",
   "direction": "long_only",
   "session": "regular_hours",

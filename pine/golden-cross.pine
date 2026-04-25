@@ -1,0 +1,40 @@
+//@version=6
+strategy("Golden Cross — SMA(50)/SMA(200)", overlay = true, initial_capital = 10000, default_qty_type = strategy.percent_of_equity, default_qty_value = 100, commission_type = strategy.commission.cash_per_order, commission_value = 4.95, pyramiding = 0, calc_on_every_tick = false)
+
+// ── Inputs ───────────────────────────────────────────────────────────
+fastLen = input.int(50,  "Fast SMA length",  minval = 1)
+slowLen = input.int(200, "Slow SMA length",  minval = 1)
+showLabels = input.bool(true, "Show cross labels")
+shadeRegime = input.bool(true, "Shade bullish regime background")
+
+// ── Indicators ───────────────────────────────────────────────────────
+fastMA = ta.sma(close, fastLen)
+slowMA = ta.sma(close, slowLen)
+
+bullishRegime = fastMA > slowMA
+goldenCross   = ta.crossover(fastMA, slowMA)
+deathCross    = ta.crossunder(fastMA, slowMA)
+
+// ── Plots ────────────────────────────────────────────────────────────
+plot(fastMA, "SMA(50)",  color = color.new(color.orange, 0), linewidth = 2)
+plot(slowMA, "SMA(200)", color = color.new(color.blue,   0), linewidth = 2)
+
+fastPlot = plot(fastMA, display = display.none)
+slowPlot = plot(slowMA, display = display.none)
+fill(fastPlot, slowPlot, color = bullishRegime ? color.new(color.green, 85) : color.new(color.red, 85))
+
+bgcolor(shadeRegime and bullishRegime ? color.new(color.green, 92) : na, title = "Bullish regime")
+
+plotshape(goldenCross, title = "Golden Cross", style = shape.triangleup, location = location.belowbar, color = color.new(color.green, 0), size = size.small)
+plotshape(deathCross,  title = "Death Cross",  style = shape.triangledown, location = location.abovebar, color = color.new(color.red, 0), size = size.small)
+
+if showLabels and goldenCross
+    label.new(bar_index, low,  "Golden Cross", yloc = yloc.belowbar, color = color.green, textcolor = color.white, style = label.style_label_up,   size = size.small)
+if showLabels and deathCross
+    label.new(bar_index, high, "Death Cross",  yloc = yloc.abovebar, color = color.red,   textcolor = color.white, style = label.style_label_down, size = size.small)
+
+// ── Strategy logic (long-only, TFSA-safe) ────────────────────────────
+if goldenCross
+    strategy.entry("Long", strategy.long)
+if deathCross
+    strategy.close("Long")

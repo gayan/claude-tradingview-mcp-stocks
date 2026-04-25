@@ -1,5 +1,6 @@
 node_modules/
 .env
 .questrade-token.json
+.orb-state.json
 safety-check-log.json
 trades.csv

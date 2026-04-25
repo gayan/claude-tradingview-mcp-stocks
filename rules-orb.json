@@ -1,0 +1,56 @@
+{
+  "watchlist": ["SPY", "QQQ", "IWM"],
+  "default_timeframe": "1m",
+  "direction": "long_only",
+  "session": "regular_hours",
+  "holding_period": "intraday",
+  "live_mode_blocked": true,
+  "live_mode_blocked_reason": "Account too small for round-trip commissions; long-only intraday in TFSA risks CRA business-income reclassification. Requires non-registered margin account + cheaper broker (e.g. IBKR Lite) before going live.",
+
+  "strategy": {
+    "name": "Opening Range Breakout (5-minute) — long-only",
+    "sources": [
+      "Toby Crabel — Day Trading with Short-Term Price Patterns and Opening Range Breakout (1990)",
+      "Carlo Zarattini, Andrew Aziz — Can Day Trading Really Be Profitable? (SSRN, 2023)"
+    ],
+    "description": "Wait for the first 5 minutes after the US market opens (9:30–9:35 ET). Mark that bar's high and low — that's the Opening Range. If price breaks above the OR high during the rest of the day, enter long. Stop at the OR low. Target at OR high + 2 × OR range (2R). Force-close any open position 15 minutes before market close (3:45 ET). Long-only — short signals are ignored. Stop placing new entries after 2 losses on the same day."
+  },
+
+  "indicators": {
+    "or_high": "High of the 9:30–9:35 ET 5-minute candle. Computed once per day per symbol.",
+    "or_low":  "Low of the 9:30–9:35 ET 5-minute candle. Computed once per day per symbol.",
+    "or_range": "or_high − or_low. This is 1R, the unit of risk."
+  },
+
+  "bias_criteria": {
+    "bullish": ["Price has broken above the 5-minute OR high"]
+  },
+
+  "entry_rules": {
+    "long": [
+      "It is between 9:35 and 15:30 ET (we want at least 15 minutes before force-close)",
+      "Price has crossed above the 5-minute OR high in the current minute",
+      "We do not currently hold a position in this symbol",
+      "We have not already entered this symbol today",
+      "Daily circuit breaker has not tripped (fewer than 2 losses today across all symbols)"
+    ]
+  },
+
+  "exit_rules": [
+    "Hard stop: OR low (1R loss). Logged as a loss.",
+    "Take profit: OR high + 2 × (OR high − OR low). 2R win.",
+    "Time stop: 15:45 ET — force-close any open position at the current price."
+  ],
+
+  "risk_rules": [
+    "Long-only — TFSA cannot short, also matches the strategy's published edge",
+    "Whole shares only — no fractional",
+    "Max 1 entry per symbol per day",
+    "Max 2 losing trades per day — circuit breaker stops new entries (open positions still play out to their stop or target)",
+    "Position size: spend MAX_TRADE_SIZE_USD or fewer dollars; round down to whole shares; respect PORTFOLIO_VALUE_USD",
+    "Skip days with US market holidays",
+    "PAPER MODE ONLY for now — live execution is disabled by `live_mode_blocked: true` above"
+  ],
+
+  "notes": "Long-only ORB on liquid US ETFs. Expect ~1.5 setups/day on average across SPY/QQQ/IWM (long-only halves the signal count vs long+short). Win rate historically 40–50%; with 2R targets, expectancy is positive in studies but ANY individual day can lose. The 2-loss circuit breaker is the most important rule — it caps daily drawdown."
+}

@@ -1,0 +1,103 @@
+//@version=6
+indicator("Opening Range Breakout (5m) — long only", overlay = true, max_lines_count = 500, max_labels_count = 500, max_boxes_count = 500)
+
+// ── Inputs ───────────────────────────────────────────────────────────
+orMinutes = input.int(5, "Opening range minutes", minval = 1, maxval = 60)
+targetR = input.float(2.0, "Target (in R)", minval = 0.5, step = 0.5)
+showTarget = input.bool(true, "Show 2R target line")
+showStop = input.bool(true, "Show stop line")
+forceCloseTime = input.session("1545-1546", "Force close at (ET)")
+sessionStr = input.session("0930-1600", "Regular hours (ET)")
+
+// ── Time helpers ─────────────────────────────────────────────────────
+inSession = not na(time(timeframe.period, sessionStr, "America/New_York"))
+inForceClose = not na(time(timeframe.period, forceCloseTime, "America/New_York"))
+
+// ── State ────────────────────────────────────────────────────────────
+var float orHigh = na
+var float orLow = na
+var int orStartMin = na
+var bool orComplete = false
+var bool entered = false
+var float entryPrice = na
+var float stopPrice = na
+var float targetPrice = na
+var int dayKey = na
+var line orHighLine = na
+var line orLowLine = na
+var line stopLine = na
+var line targetLine = na
+var box orBox = na
+
+// New trading day → reset
+todayKey = year * 10000 + month * 100 + dayofmonth
+if todayKey != dayKey
+    dayKey := todayKey
+    orHigh := na
+    orLow := na
+    orStartMin := na
+    orComplete := false
+    entered := false
+    entryPrice := na
+    stopPrice := na
+    targetPrice := na
+    if not na(orHighLine)
+        line.delete(orHighLine)
+    if not na(orLowLine)
+        line.delete(orLowLine)
+    if not na(stopLine)
+        line.delete(stopLine)
+    if not na(targetLine)
+        line.delete(targetLine)
+    if not na(orBox)
+        box.delete(orBox)
+    orHighLine := na
+    orLowLine := na
+    stopLine := na
+    targetLine := na
+    orBox := na
+
+// Within session and inside the OR window (first orMinutes minutes after 9:30)
+sessionStart = timestamp("America/New_York", year, month, dayofmonth, 9, 30, 0)
+inOrWindow = inSession and time >= sessionStart and time < sessionStart + orMinutes * 60 * 1000
+
+if inOrWindow
+    orHigh := na(orHigh) ? high : math.max(orHigh, high)
+    orLow := na(orLow) ? low : math.min(orLow, low)
+
+// First bar AFTER the OR window completes → finalize OR and draw it
+justFinalised = inSession and time >= sessionStart + orMinutes * 60 * 1000 and not orComplete and not na(orHigh)
+if justFinalised
+    orComplete := true
+    orBox := box.new(left = sessionStart, top = orHigh, right = time, bottom = orLow, bgcolor = color.new(color.blue, 85), border_color = color.new(color.blue, 50))
+    orHighLine := line.new(x1 = time, y1 = orHigh, x2 = time, y2 = orHigh, color = color.new(color.green, 0), width = 2, extend = extend.right)
+    orLowLine := line.new(x1 = time, y1 = orLow, x2 = time, y2 = orLow, color = color.new(color.red, 0), width = 2, extend = extend.right)
+    label.new(time, orHigh, "OR high " + str.tostring(orHigh, format.mintick), style = label.style_label_left, color = color.green, textcolor = color.white, size = size.small)
+    label.new(time, orLow, "OR low " + str.tostring(orLow, format.mintick), style = label.style_label_left, color = color.red, textcolor = color.white, size = size.small)
+
+// Long entry on first close above OR high after window completes
+canEnter = orComplete and not entered and inSession and not inForceClose
+if canEnter and close > orHigh
+    entered := true
+    entryPrice := close
+    stopPrice := orLow
+    targetPrice := orHigh + targetR * (orHigh - orLow)
+    label.new(bar_index, low, "BUY @ " + str.tostring(entryPrice, format.mintick), yloc = yloc.belowbar, color = color.green, textcolor = color.white, style = label.style_label_up, size = size.normal)
+    if showStop
+        stopLine := line.new(x1 = time, y1 = stopPrice, x2 = time, y2 = stopPrice, color = color.new(color.red, 30), width = 1, style = line.style_dashed, extend = extend.right)
+    if showTarget
+        targetLine := line.new(x1 = time, y1 = targetPrice, x2 = time, y2 = targetPrice, color = color.new(color.green, 30), width = 1, style = line.style_dashed, extend = extend.right)
+
+// Stop / target / time-stop markers
+if entered
+    if low <= stopPrice
+        label.new(bar_index, high, "STOP @ " + str.tostring(stopPrice, format.mintick), yloc = yloc.abovebar, color = color.red, textcolor = color.white, style = label.style_label_down, size = size.normal)
+        entered := false
+    else if high >= targetPrice
+        label.new(bar_index, low, "TARGET @ " + str.tostring(targetPrice, format.mintick), yloc = yloc.belowbar, color = color.green, textcolor = color.white, style = label.style_label_up, size = size.normal)
+        entered := false
+    else if inForceClose
+        label.new(bar_index, low, "TIME EXIT @ " + str.tostring(close, format.mintick), yloc = yloc.belowbar, color = color.orange, textcolor = color.white, style = label.style_label_up, size = size.normal)
+        entered := false
+
+bgcolor(inSession ? na : color.new(color.gray, 95))

@@ -1,0 +1,13 @@
+{
+  "name": "claude-tradingview-mcp-stocks",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Automated stock trading bot — TradingView MCP + Claude + Questrade. TFSA-friendly, long-only, Golden Cross by default.",
+  "scripts": {
+    "start": "node bot.js",
+    "tax-summary": "node bot.js --tax-summary"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  }
+}

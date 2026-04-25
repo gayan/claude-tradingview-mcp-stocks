@@ -1,0 +1,47 @@
+{
+  "watchlist": ["SPY"],
+  "default_timeframe": "1D",
+  "direction": "long_only",
+  "session": "regular_hours",
+  "holding_period": "swing",
+
+  "strategy": {
+    "name": "Golden Cross — SMA(50)/SMA(200) Trend Following",
+    "sources": ["Meb Faber — A Quantitative Approach to Tactical Asset Allocation"],
+    "description": "Two simple moving averages, one signal. Buy when SMA(50) crosses above SMA(200) (Golden Cross). Exit when SMA(50) crosses back below SMA(200) (Death Cross). Long-only. Daily bars. Designed for broad index ETFs — SPY, VFV, VOO."
+  },
+
+  "indicators": {
+    "sma_50": "Short-term trend. 50-day simple moving average of close prices.",
+    "sma_200": "Long-term trend. 200-day simple moving average of close prices."
+  },
+
+  "bias_criteria": {
+    "bullish": ["SMA(50) is above SMA(200)"],
+    "bearish": ["SMA(50) is below SMA(200)"]
+  },
+
+  "entry_rules": {
+    "long": [
+      "SMA(50) is above SMA(200) — long-term uptrend confirmed",
+      "Yesterday SMA(50) was at or below SMA(200) — today is a fresh cross (Golden Cross)",
+      "We do not currently hold a position in this symbol"
+    ]
+  },
+
+  "exit_rules": [
+    "Exit when SMA(50) crosses back below SMA(200) (Death Cross)",
+    "No fixed stop loss — the moving average crossover IS the exit signal"
+  ],
+
+  "risk_rules": [
+    "Long-only — TFSA cannot short",
+    "Whole shares only — no fractional",
+    "Maximum trade size capped by MAX_TRADE_SIZE_USD in .env",
+    "Maximum trades per day capped by MAX_TRADES_PER_DAY in .env",
+    "Trade only during regular US market hours (9:30am–4:00pm ET, Mon–Fri)",
+    "Skip days with US market holidays"
+  ],
+
+  "notes": "Trend-following on broad indices. Expect 1–2 entry signals per year, occasional whipsaws. Underperforms buy-and-hold in steady bull markets, outperforms during bear markets. Do not apply to individual stocks without backtesting — single-name trend systems have very different risk profiles."
+}

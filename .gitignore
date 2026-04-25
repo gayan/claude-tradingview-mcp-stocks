@@ -1,0 +1,5 @@
+node_modules/
+.env
+.questrade-token.json
+safety-check-log.json
+trades.csv

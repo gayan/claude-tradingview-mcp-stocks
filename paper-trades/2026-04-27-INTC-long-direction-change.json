@@ -1,0 +1,43 @@
+{
+  "id": "2026-04-27-INTC-long-direction-change",
+  "recorded_at": "2026-04-27T12:55:00Z",
+  "status": "pending_open",
+  "symbol": "INTC",
+  "exchange": "NASDAQ",
+  "side": "long",
+  "order_type": "buy_stop",
+  "thesis": "Premarket faded from $87.10 (Friday RTH high) and is making lower highs. Place a buy stop above the most recent reactive high so the order only triggers if the downtrend flips into a higher-high. 3:1 R:R with stop below today's PM low.",
+  "setup": {
+    "trigger_price": 84.30,
+    "stop_price": 82.79,
+    "target_price": 88.83,
+    "risk_per_share": 1.51,
+    "reward_per_share": 4.53,
+    "risk_reward_ratio": 3.0,
+    "shares": 83,
+    "max_loss_usd": 125.33,
+    "target_gain_usd": 376.0,
+    "account_size_simulated": 500,
+    "risk_pct_of_account": 25
+  },
+  "key_levels": {
+    "premarket_high": 87.10,
+    "premarket_low": 82.79,
+    "friday_rth_high": 87.10,
+    "friday_rth_low": 79.63,
+    "friday_close": 82.54,
+    "friday_gap_open": 82.20,
+    "friday_pre_gap_close": 66.78
+  },
+  "exit_priority": [
+    "If a single 1-min bar touches both stop and target after entry, assume STOP fills first (conservative).",
+    "If neither stop nor target hit by 16:00 ET, mark as open-at-close, exit at session close price."
+  ],
+  "context": {
+    "session_date": "2026-04-27",
+    "rth_open_utc": "2026-04-27T13:30:00Z",
+    "rth_close_utc": "2026-04-27T20:00:00Z",
+    "evaluation_after_utc": "2026-04-27T20:05:00Z"
+  },
+  "outcome": null
+}
